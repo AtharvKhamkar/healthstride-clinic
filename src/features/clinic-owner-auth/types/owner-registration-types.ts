@@ -47,11 +47,20 @@ export interface OwnerRegistrationResponse { isRegistered: boolean; userId: stri
 export interface OwnerVerificationResponse { isVerified: boolean; }
 
 export interface OwnerLoginResponse {
-    userId: string; email: string; firstName: string;
-    middleName?: string; lastName: string | null;
-    countryCode: string; phoneNumber?: string | null;
-    profileImage?: string | null; gender: Gender;
-    clinicName: string; role: string; isVerified: boolean;
-    accessToken: string; refreshToken: string;
-    isDisabled?: boolean; isDeleted?: boolean;
+    userId: string;
+    email: string;
+    firstName: string;
+    middleName?: string;
+    lastName: string | null;
+    countryCode: string;
+    phoneNumber?: string | null;
+    profileImage?: string | null;
+    gender: Gender;
+    clinicName: string;
+    role: string;
+    isVerified: boolean;
+    accessToken: string;
+    refreshToken: string;
+    isDisabled?: boolean;
+    isDeleted?: boolean;
 }

@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import {
   createContext,
   ReactNode,
@@ -6,7 +6,11 @@ import {
   useContext,
   useState,
 } from "react";
-import { CheckOwnerExistsResponse } from "../types/owner-registration-types";
+import {
+  CheckOwnerExistsResponse,
+  OwnerLoginRequest,
+  OwnerLoginResponse,
+} from "../types/owner-registration-types";
 import { useApiClient } from "@/src/providers/ApiClientProvider";
 import { OwnerRegistrationApi } from "../api/owner-registration-api";
 
@@ -16,7 +20,9 @@ interface OwnerRegistrationContextValue {
   step: AuthStep;
   isLoading: boolean;
   error: string | null;
+  user: OwnerLoginResponse | null;
   checkOwnerExists: (email: string) => Promise<CheckOwnerExistsResponse | null>;
+  login: (req: OwnerLoginRequest) => Promise<OwnerLoginResponse | null>;
 }
 
 const OwnerRegistrationContext =
@@ -34,6 +40,7 @@ export function OwnerRegistrationProvider({
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [user, setUser] = useState<OwnerLoginResponse | null>(null);
 
   //check owner exists
   const checkOwnerExists = useCallback(
@@ -61,13 +68,38 @@ export function OwnerRegistrationProvider({
     [api],
   );
 
+  const login = useCallback(
+    async (req: OwnerLoginRequest): Promise<OwnerLoginResponse | null> => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const res = await api.login(req);
+        if (!res.success || !res.data) {
+          setError(res.message || "Login failed.");
+          return null;
+        }
+        setUser(res.data);
+        setEmail(res.data.email);
+        return res.data;
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Something went wrong.");
+        return null;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [api],
+  );
+
   return (
     <OwnerRegistrationContext.Provider
       value={{
         step,
         isLoading,
         error,
+        user,
         checkOwnerExists,
+        login,
       }}
     >
       {children}
