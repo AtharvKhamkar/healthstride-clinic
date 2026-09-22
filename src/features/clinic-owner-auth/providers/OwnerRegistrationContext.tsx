@@ -10,6 +10,8 @@ import {
   CheckOwnerExistsResponse,
   OwnerLoginRequest,
   OwnerLoginResponse,
+  OwnerRegisterRequest,
+  OwnerRegistrationResponse,
 } from "../types/owner-registration-types";
 import { useApiClient } from "@/src/providers/ApiClientProvider";
 import { OwnerRegistrationApi } from "../api/owner-registration-api";
@@ -22,6 +24,9 @@ interface OwnerRegistrationContextValue {
   error: string | null;
   user: OwnerLoginResponse | null;
   checkOwnerExists: (email: string) => Promise<CheckOwnerExistsResponse | null>;
+  register: (
+    req: OwnerRegisterRequest,
+  ) => Promise<OwnerRegistrationResponse | null>;
   login: (req: OwnerLoginRequest) => Promise<OwnerLoginResponse | null>;
 }
 
@@ -68,6 +73,32 @@ export function OwnerRegistrationProvider({
     [api],
   );
 
+  const register = useCallback(
+    async (
+      req: OwnerRegisterRequest,
+    ): Promise<OwnerRegistrationResponse | null> => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        const res = await api.register(req);
+
+        if (!res.success || !res.data) {
+          setError(res.message || "Registration failed");
+          return null;
+        }
+
+        return res.data;
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Something went wrong.");
+        return null;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [api],
+  );
+
   const login = useCallback(
     async (req: OwnerLoginRequest): Promise<OwnerLoginResponse | null> => {
       try {
@@ -99,6 +130,7 @@ export function OwnerRegistrationProvider({
         error,
         user,
         checkOwnerExists,
+        register,
         login,
       }}
     >
